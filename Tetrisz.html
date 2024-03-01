@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+            background-color: darkseagreen;
+        }
+        #jatek{
+            display: inline-block;vertical-align: top;
+            background-color: white;
+            border: solid 1px black;
+            width: 576px;height: 864px;
+            font-size: 0pt;
+            padding: 10px;
+        }
+        #kov{
+            display: inline-block;vertical-align: top;
+            width: 144px;height: 864px;
+            background-color: white;
+            border: solid 1px black;
+            padding: 10px;
+        }
+        #next{font-size: 0px;}
+        #nagy
+        {
+            
+            text-align: center;
+
+        }
+        #kov p{font-size: 16pt;font-weight: bold; margin: 5px;}
+        #pont{font-size: 32pt;font-weight: bold;color: blue;}
+        #kov input{width: 100px;height: 40px;}
+        #le{height: 520px;}
+    </style>
+    <script>
+        let t=[];
+        let elemek =[
+            ["---","-Y-","---","---","-C-","-B-"],
+            ["PPP","-Y-","-GG","RR-","-C-","-B-"],
+            ["-P-","-YY","GG-","-RR","CC-","-B-"]
+    ];
+        let elem =[["","",""],
+                   ["","",""],
+                   ["","",""]];
+        let next =0;
+        let es=1,eo=5;
+        let ti = null;
+        let count =0;
+        function start(){
+            let html ="";
+            for(let s=0;s<18;s++){
+                t[s]=[]
+                for(let o=0;o<12;o++){
+                    t[s][o]="next"
+                    html+="<img id='"+s+"x"+o+"' src='next.png'>"
+                    
+                }
+            }
+            document.getElementById("jatek").innerHTML=html;
+            kezd();
+
+        }
+
+        function kezd(){
+            for(let s=0;s<18;s++){
+                for(let o=0;o<12;o++){
+                    let kep="null";
+                    if(s==0||s==17||o==0||o==11)kep="side"
+                    setKep(s,o,kep);
+                }
+            }
+            setElem(Math.floor(Math.random()*6)); mutatElem();
+            next =Math.floor(Math.random()*6); nextElem(next);
+            ti = setInterval(esik,500)
+        }
+
+        function setKep(s,o,kep){
+            document.getElementById(s+"x"+o).src=kep+".png";
+            t[s][o]=kep;
+        }
+
+        function nextElem(id){
+            for(let s=0;s<3;s++)for(let o=0;o<3;o++){
+                let b =elemek[s][id].charAt(o);
+                let kep= "next";if(b!="-")kep = "box"+b;
+                document.getElementById(s+"n"+o).src=kep+".png";
+            }
+        }
+
+        function setElem(id){
+            for(let s=0;s<3;s++)for(let o=0;o<3;o++){
+                let b =elemek[s][id].charAt(o);
+                let kep= "null";if(b!="-")kep = "box"+b;
+                elem[s][o]=kep;
+                
+            }
+        }
+
+        function mutatElem(){
+            for(let s=0;s<3;s++)for(let o=0;o<3;o++){
+                if(elem[s][o]!="null")setKep(es+s,eo+o,elem[s][o])
+            }
+        }
+
+        function torolElem(){
+            for(let s=0;s<3;s++)for(let o=0;o<3;o++){
+                if(elem[s][o]!="null")setKep(es+s,eo+o,"null")
+            }
+        }
+
+        function elferElem(ps,po,te=elem){
+            let elfer=true;
+            for(let s=0;s<3;s++)for(let o=0;o<3;o++){
+                if(te[s][o]!="null" && t[es+s+ps][eo+o+po]!="null")elfer=false;
+            }
+            return elfer
+        }
+
+        function mozgat(){
+            if(ti!=null)return
+            let k= event.key;
+            torolElem();
+            if(k=="a" && elferElem(0,-1))eo--;
+            if(k=="d"&& elferElem(0,+1))eo++;
+            if(k=="w")forgat();
+            if(k=="s" && ti!=null)esik();
+            mutatElem();
+        }
+
+        function forgat(){
+            let e=[["","",""],
+                   ["","",""],
+                   ["","",""]];
+            for(let s=0;s<3;s++)for(let o=0;o<3;o++){
+                e[s][o]=elem[o][2-s]
+            }
+            if(elferElem(0,0,e)){
+                for(let s=0;s<3;s++)for(let o=0;o<3;o++){
+                elem[s][o]=e[s][o];
+            }
+            }
+            
+        }
+
+        function esik(){
+            torolElem();
+            if(elferElem(+1,0)){
+                es++;count++;
+                mutatElem();
+            }else{
+                mutatElem();
+                count+=3;
+                es=1;eo=5;setElem(next);
+                if(elferElem(0,0)){
+                    mutatElem();
+                    next =Math.floor(Math.random()*6); nextElem(next);
+                }else{
+                    clearInterval(ti);ti=null;
+                }
+            }
+            
+            document.getElementById("pont").innerHTML=count;
+        }
+
+        function ujra(){
+            kezd();
+            count=0;
+            document.getElementById("pont").innerHTML=count;
+        }
+    </script>
+</head>
+<body onload="start();" onkeydown="mozgat();">
+    <div id="nagy">
+        <div id="jatek"></div>
+        <div id="kov">
+            <p>Pontszám:</p>
+            <p><span id="pont">0</span></p>
+            <p>Következő:<br></p>
+            <span id="next">
+                <img id="0n0" src="next.png" alt="">
+                <img id="0n1" src="next.png" alt="">
+                <img id="0n2" src="next.png" alt="">
+                <img id="1n0" src="next.png" alt="">
+                <img id="1n1" src="next.png" alt="">
+                <img id="1n2" src="next.png" alt="">
+                <img id="2n0" src="next.png" alt="">
+                <img id="2n1" src="next.png" alt="">
+                <img id="2n2" src="next.png" alt="">
+            </span>
+            <p id="le"></p>
+            <input type="button" onclick="ujra();" value="Újrakezd">
+        </div>
+    </div>
+</body>
+</html>
